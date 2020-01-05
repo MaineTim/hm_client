@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='minimal-table.css') }}">
+        <title>Status - Housemon</title>
+    </head>
+    <body>
+        <h3>Status - Housemon</h3>
+        <table>
+        {% for location, temperature in temperatures.items() %}
+        <tr>
+        <td>{{ location }}</td>
+        <td>{{ temperature }}</td>
+        </tr>
+        {% endfor %}
+        </table>
+        <p style="font-size:80%;">Last updated: {{update_time}} </p>
+        <p style="font-size:80%;">Housemon Ver. {{version}}</p>
+    </body>
+</html>
