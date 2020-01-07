@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.8"
 flask = "^1.1"
 dataset = "^1.1.2"
+gunicorn = "^20.0.4"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^18.3-alpha.0", allow-prereleases = true}
