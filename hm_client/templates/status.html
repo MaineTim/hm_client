@@ -6,13 +6,29 @@
     <body>
         <h3>Status - Housemon</h3>
         <table>
-        {% for location, temperature in temperatures.items() %}
-        <tr>
-        <td>{{ location }}</td>
-        <td>{{ temperature }}</td>
-        </tr>
-        {% endfor %}
+            {% for location, temperature in temperatures.items() %}
+                <tr>
+                    <td>{{ location }}</td>
+                    <td>{{ temperature }}</td>
+                </tr>
+            {% endfor %}
         </table>
+        <br>
+        <table>
+            <tr>
+                <td>UPS Status</td>
+                <td>{{ups_status}}</td>
+            </tr>
+            <tr>
+                <td>UPS Charge</td>
+                <td>{{ups_charge}}</td>    
+            </tr>  
+            <tr>
+                <td>UPS Runtime</td>
+                <td>{{ups_runtime}}</td>    
+            </tr>
+        </table>
+        <br>
         <p style="font-size:80%;">Last updated: {{update_time}} </p>
         <p style="font-size:80%;">Housemon Ver. {{version}}</p>
     </body>

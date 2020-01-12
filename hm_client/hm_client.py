@@ -3,7 +3,7 @@ import datetime
 import flask
 import pprint
 
-version = "2020-01-05.01"
+version = "2020-01-12.01"
 
 app = flask.Flask(__name__)
 db = dataset.connect(
@@ -21,6 +21,11 @@ def update():
     for key in content["temps"]:
         table.upsert(
             dict(location=key, temperature=content["temps"][key]), ["location"]
+        )
+    table = db["ups"]
+    for key in content["ups"]:
+        table.upsert(
+            dict(var=key, data=content["ups"][key]), ["var"]
         )
     db["data"].upsert(
         dict(data="time", time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
@@ -49,11 +54,13 @@ def status():
     # Create a dict of temps for rendering.
     for entry in db["temperatures"].distinct("location", "temperature"):
         temperatures[entry["location"]] = entry["temperature"]
-    update_time = db["data"].find_one(data="time")["time"]
     return flask.render_template(
         "status.html",
         temperatures=temperatures,
-        update_time=update_time,
+        ups_status=db["ups"].find_one(var="status")["data"],
+        ups_charge=db["ups"].find_one(var="charge")["data"],
+        ups_runtime=db["ups"].find_one(var="runtime")["data"],
+        update_time=db["data"].find_one(data="time")["time"],
         version=version,
     )
 
@@ -74,4 +81,5 @@ def catch_all(path):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+#    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True, port=8000)
