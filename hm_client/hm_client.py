@@ -3,7 +3,7 @@ import datetime
 import flask
 import pprint
 
-version = "2020-01-12.01"
+version = "2020-11-12.01"
 
 app = flask.Flask(__name__)
 db = dataset.connect(
@@ -28,9 +28,19 @@ def update():
             dict(var=key, data=content["ups"][key]), ["var"]
         )
     db["data"].upsert(
-        dict(data="time", time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+        dict(data="time", store=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         ["data"],
     )
+    if content["ups"]["status"] != db["data"].find_one(data="state")["store"]:
+        db["data"].upsert(dict(data="state", store=content["ups"]["status"]), ["data"])
+        if content["ups"]["status"] == "OB":
+            db["data"].upsert(dict(data="lastOB", store=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                ["data"]
+            )
+        else:
+            db["data"].upsert(dict(data="lastOL", store=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                ["data"]
+            )
     return flask.Response("200 OK", status=200, mimetype="application/json")
 
 
@@ -60,7 +70,9 @@ def status():
         ups_status=db["ups"].find_one(var="status")["data"],
         ups_charge=db["ups"].find_one(var="charge")["data"],
         ups_runtime=db["ups"].find_one(var="runtime")["data"],
-        update_time=db["data"].find_one(data="time")["time"],
+        ups_lastOL=db["data"].find_one(data="lastOL")["store"],
+        ups_lastOB=db["data"].find_one(data="lastOB")["store"],
+        update_time=db["data"].find_one(data="time")["store"],
         version=version,
     )
 
@@ -81,5 +93,9 @@ def catch_all(path):
 
 
 if __name__ == "__main__":
+    if db["data"].find_one(data="state") == None:
+        db["data"].upsert(dict(data="state", store="OL"), ["data"])
+        db["data"].upsert(dict(data="lastOL", store="Not available"), ["data"])
+        db["data"].upsert(dict(data="lastOB", store="Not available"), ["data"])
 #    app.run(host="0.0.0.0")
     app.run(host="0.0.0.0", debug=True, port=8000)
