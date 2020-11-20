@@ -3,7 +3,7 @@ import datetime
 import flask
 import pprint
 
-version = "2020-11-12.01"
+version = "2020-11-20.01"
 
 app = flask.Flask(__name__)
 db = dataset.connect(
@@ -20,7 +20,7 @@ def update():
     table = db["temperatures"]
     for key in content["temps"]:
         table.upsert(
-            dict(location=key, temperature=content["temps"][key]), ["location"]
+            dict(location=key, temperature=round(content["temps"][key], 2)), ["location"]
         )
     table = db["ups"]
     for key in content["ups"]:
@@ -52,7 +52,7 @@ def update_temps():
     table = db["temperatures"]
     for key in content["temps"]:
         table.upsert(
-            dict(location=key, temperature=content["temps"][key]), ["location"]
+            dict(location=key, temperature=round(content["temps"][key], 2)), ["location"]
         )
     return flask.Response("200 OK", status=200, mimetype="application/json")
 
@@ -92,10 +92,10 @@ def catch_all(path):
     return return_string % (version, path)
 
 
+if db["data"].find_one(data="state") == None:
+    db["data"].upsert(dict(data="state", store="OL"), ["data"])
+    db["data"].upsert(dict(data="lastOL", store="Not available"), ["data"])
+    db["data"].upsert(dict(data="lastOB", store="Not available"), ["data"])
+
 if __name__ == "__main__":
-    if db["data"].find_one(data="state") == None:
-        db["data"].upsert(dict(data="state", store="OL"), ["data"])
-        db["data"].upsert(dict(data="lastOL", store="Not available"), ["data"])
-        db["data"].upsert(dict(data="lastOB", store="Not available"), ["data"])
-#    app.run(host="0.0.0.0")
     app.run(host="0.0.0.0", debug=True, port=8000)
